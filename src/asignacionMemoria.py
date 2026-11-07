@@ -8,6 +8,9 @@ class particionMemoria:
     tamano: int
     proceso: str | None = None
 
+# Se saltea la parte del SO
+    _id = count(2)
+
 memoria = [
     #Reservada para el SO
     particionMemoria(0, 0, 100, proceso = "SO"),
@@ -25,14 +28,12 @@ def bestFit (memoria, proceso):
                 mejorHueco = i
     # No encontro espacio, pasa a listo-suspendido
     if mejorHueco == None:
-           return False
+        return False
         
     bestFitAgrega(memoria, proceso, mejorHueco)
     return True
 
 def bestFitAgrega(mejorHueco):
-    # Se saltea la parte del SO
-    _id = count(2)
     hueco = memoria[mejorHueco]
     sobrante = hueco.tamano - proceso.tamano
     # El hueco pasa a medir lo mismo que el proceso y se ocupa
