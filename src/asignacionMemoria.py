@@ -18,19 +18,17 @@ memoria = [
 # Implementación algoritmo BEST FIT
 # El parámetro proceso se pasa desde procesarArchivo.py
 def bestFit (memoria, proceso):
-    # Se saltea la parte del SO
-    _id = count(2)
     mejorHueco = None
     for i, v in enumerate(memoria):
         if v.proceso == None and v.proceso >= proceso.tamano:
             if mejorHueco == None or memoria[mejorHueco] < proceso.tamano:
                 mejorHueco = i
-        bestFitAgrega(mejorHueco)
-        # No encontro espacio, pasa a listo-suspendido
-        if mejorHueco == None:
-            pass
-            # llama a función que trate el caso
-            # listo-suspendido(proceso)
+    # No encontro espacio, pasa a listo-suspendido
+    if mejorHueco == None:
+           return False
+        
+    bestFitAgrega(memoria, proceso, mejorHueco)
+    return True
 
 def bestFitAgrega(mejorHueco):
     # Se saltea la parte del SO
