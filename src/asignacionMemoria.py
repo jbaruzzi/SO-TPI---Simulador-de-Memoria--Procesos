@@ -9,7 +9,7 @@ class particionMemoria:
     proceso: str | None = None
 
 # Se saltea la parte del SO
-    _id = count(2)
+_id = count(2)
 
 memoria = [
     #Reservada para el SO
