@@ -23,11 +23,11 @@ memoria = [
 def bestFit (memoria, proceso):
     mejorHueco = None
     for i, v in enumerate(memoria):
-        if v.proceso == None and v.proceso >= proceso.tamano:
-            if mejorHueco == None or memoria[mejorHueco] < proceso.tamano:
+        if v.proceso is None and v.proceso >= proceso.tamano:
+            if mejorHueco is None or memoria[mejorHueco] < proceso.tamano:
                 mejorHueco = i
     # No encontro espacio, pasa a listo-suspendido
-    if mejorHueco == None:
+    if mejorHueco is None:
         return False
         
     bestFitAgrega(memoria, proceso, mejorHueco)
@@ -51,3 +51,16 @@ def bestFitAgrega(mejorHueco):
     if sobrante > 0:
         memoria.insert(mejorHueco + 1, particionMemoria(next(_id), hueco.inicio + hueco.tamano, sobrante))
     return True
+
+# Cuando hayan dos particiones seguidas que esten libres se deben unir para formar una unica partición (esto no es compactación)
+def unirParticionesMemoria(memoria):
+    i = 0
+    while i < len(memoria) - 1:
+        actual = memoria[i]
+        siguiente = memoria[i + 1]
+        if actual.proceso is None and siguiente.proceso is None:
+            # Junta ambos huecos y "elimina" de la lista el hueco que absorvio
+            actual.tamano += siguiente.tamano
+            memoria.pop[i + 1]
+        else:
+            i += 1
