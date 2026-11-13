@@ -1,13 +1,24 @@
 """Lectura y validación del archivo CSV de procesos."""
 
 import csv
+import sys
 from pathlib import Path
 
-from .proceso import Proceso
+from proceso import Proceso
 
 
 MAX_PROCESOS_CARGADOS = 10
-ARCHIVO_POR_DEFECTO = Path(__file__).resolve().parent / "procesosTest1.csv"
+MEMORIA_USUARIOS = 450  # K disponibles para procesos (el SO ocupa los 100K restantes)
+
+# Carpeta donde está el programa: si se entrega como ejecutable (.exe) es la
+# carpeta del ejecutable, si se corre con Python es la carpeta de este módulo.
+if getattr(sys, "frozen", False):
+    CARPETA_BASE = Path(sys.executable).resolve().parent
+else:
+    CARPETA_BASE = Path(__file__).resolve().parent
+
+# Archivo que se usa cuando no se carga ningún .csv desde el menú
+ARCHIVO_POR_DEFECTO = CARPETA_BASE / "test" / "lotePrueba1.csv"
 COLUMNAS_REQUERIDAS = {"ID", "TA", "TI", "TAM"}
 
 
@@ -72,6 +83,10 @@ def leer_archivo(ruta: str | Path | None = None) -> list[Proceso]:
                 raise ValueError(f"El tiempo de CPU de la fila {numero_fila} debe ser positivo.")
             if tamano <= 0:
                 raise ValueError(f"El tamaño de la fila {numero_fila} debe ser positivo.")
+            if tamano > MEMORIA_USUARIOS:
+                raise ValueError(
+                    f"El tamaño de la fila {numero_fila} supera los {MEMORIA_USUARIOS}K de memoria para procesos."
+                )
 
             procesos.append(
                 Proceso(

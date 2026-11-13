@@ -1,6 +1,6 @@
 """Funciones básicas del planificador SRTF."""
 
-from .proceso import Proceso
+from proceso import Proceso
 
 
 def seleccionar_proceso(listos: list[Proceso]) -> Proceso | None:
