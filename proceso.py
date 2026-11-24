@@ -11,6 +11,7 @@ class Proceso:
     tamano: int
     restante: int = field(init=False)
     estado: str = "Nuevo"  # Nuevo, Listo, Listo/Suspendido, Ejecución o Terminado.
+    ingreso_listo: int | None = None  # Instante de arribo a la cola de Listos (referencia para estadísticas).
     fin: int | None = None
 
     def __post_init__(self) -> None:

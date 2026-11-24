@@ -1,6 +1,12 @@
 # Importar dependecias
 from algoritmoSRTF import seleccionar_proceso, ejecutar_unidad
-from asignacionMemoria import crearMemoria, bestFit, liberarParticion, unirParticionesMemoria
+from asignacionMemoria import (
+    crearMemoria,
+    bestFit,
+    liberarParticion,
+    unirParticionesMemoria,
+    calcularFragmentacionExterna,
+)
 from procesarArchivo import leer_archivo, ARCHIVO_POR_DEFECTO
 
 # Constantes
@@ -94,12 +100,12 @@ def mostrarSalida(reloj, eventos, procesoCPU, memoria, nuevos):
 
     # Tabla de particiones
     print("Tabla de particiones:")
-    print(f"{'Id':<5}{'Inicio':<9}{'Tamaño':<9}{'Proceso':<10}{'Frag. interna'}")
+    print(f"{'Id':<5}{'Inicio':<9}{'Tamaño':<9}{'Proceso'}")
     for particion in memoria:
         proceso = particion.proceso if particion.proceso is not None else "Libre"
-        # En MVT cada partición se crea del tamaño justo del proceso: no hay fragmentación interna
-        frag = "0K" if particion.proceso is not None else "-"
-        print(f"{particion.id:<5}{str(particion.inicio) + 'K':<9}{str(particion.tamano) + 'K':<9}{proceso:<10}{frag}")
+        print(f"{particion.id:<5}{str(particion.inicio) + 'K':<9}{str(particion.tamano) + 'K':<9}{proceso}")
+    fragExterna = calcularFragmentacionExterna(memoria, listosSupendidos)
+    print(f"Fragmentación externa: {fragExterna}K")
     print("-------------------------------------------------")
 
     # Las colas
@@ -107,27 +113,32 @@ def mostrarSalida(reloj, eventos, procesoCPU, memoria, nuevos):
     print("Cola de Listos/Suspendidos:", formatoCola(listosSupendidos))
     print("Nuevos esperando cupo:", formatoCola(nuevos))
 
-# Informe estadístico cuando terminan todos los procesos
+# Informe estadístico cuando terminan todos los procesos (calculado sobre la cola de Listos)
 def mostrarInforme(procesos, reloj):
-    print("=================================================")
-    print("INFORME FINAL")
-    print("=================================================")
-    print(f"{'Proceso':<10}{'Arribo':<9}{'Irrupción':<11}{'Fin':<6}{'Retorno':<9}{'Espera'}")
+    print("=================================================================")
+    print("INFORME FINAL (estadísticas calculadas sobre la cola de Listos)")
+    print("=================================================================")
+    print(f"{'Proceso':<9}{'TA':<6}{'Ing.Listo':<11}{'Irrupción':<11}{'Fin':<6}{'Retorno':<9}{'Espera'}")
     totalRetorno = 0
     totalEspera = 0
     for proceso in procesos:
-        retorno = proceso.fin - proceso.arribo
+        # Se usa el ingreso a la cola de Listos (no el TA inicial) para excluir Nuevo y Listo/Suspendido
+        retorno = proceso.fin - proceso.ingreso_listo
+        # Tiempo de espera acumulado únicamente dentro de la cola de Listos
         espera = retorno - proceso.irrupcion
         totalRetorno += retorno
         totalEspera += espera
-        print(f"{proceso.id:<10}{proceso.arribo:<9}{proceso.irrupcion:<11}{proceso.fin:<6}{retorno:<9}{espera}")
+        print(
+            f"{proceso.id:<9}{proceso.arribo:<6}{proceso.ingreso_listo:<11}"
+            f"{proceso.irrupcion:<11}{proceso.fin:<6}{retorno:<9}{espera}"
+        )
     cantidad = len(procesos)
-    print("-------------------------------------------------")
+    print("-----------------------------------------------------------------")
     print(f"Tiempo de retorno promedio: {totalRetorno / cantidad:.2f}")
     print(f"Tiempo de espera promedio: {totalEspera / cantidad:.2f}")
     print(f"Rendimiento del sistema: {cantidad / reloj:.3f} procesos terminados por unidad de tiempo")
     print(f"({cantidad} procesos terminados en {reloj} unidades de tiempo)")
-    print("=================================================")
+    print("=================================================================")
 
 # Bucle principal del simulador
 def simulador():
@@ -213,6 +224,8 @@ def simulador():
                 if bestFit(memoria, proceso):
                     listosSupendidos.remove(proceso)
                     proceso.estado = "Listo"
+                    # Se marca el arribo a la cola de Listos como base para retorno y espera
+                    proceso.ingreso_listo = reloj
                     listos.append(proceso)
                     eventos.append(f"El proceso {proceso.id} pasó de Listo/Suspendido a Listo")
                     entro = True
@@ -223,6 +236,7 @@ def simulador():
             proceso = nuevos.pop(0)
             if bestFit(memoria, proceso):
                 proceso.estado = "Listo"
+                proceso.ingreso_listo = reloj
                 listos.append(proceso)
                 eventos.append(f"El proceso {proceso.id} pasó a Listo (se le asignó partición)")
             else:
@@ -240,6 +254,7 @@ def simulador():
         if elegido is not None and elegido is not procesoCPU:
             if procesoCPU is not None:
                 procesoCPU.estado = "Listo"
+                # Vuelve a Listos por expropiación conservando su ingreso_listo original
                 listos.append(procesoCPU)
                 eventos.append(f"SRTF: el proceso {elegido.id} desalojó al proceso {procesoCPU.id}")
             listos.remove(elegido)

@@ -51,10 +51,10 @@ Al iniciar se muestra el menú:
 
 Durante la simulación, el programa **se detiene en cada evento** (llega un proceso o termina un proceso) y muestra:
 - el estado del procesador (proceso en ejecución),
-- la tabla de particiones de memoria (Id de partición, dirección de comienzo, tamaño, proceso asignado y fragmentación interna),
+- la tabla de particiones de memoria (Id de partición, dirección de comienzo, tamaño y proceso asignado) y la fragmentación externa,
 - la cola de Listos, la de Listos/Suspendidos y los procesos nuevos esperando cupo.
 
-Se debe presionar **Enter** para avanzar al siguiente evento. Al terminar todos los procesos se muestra el **informe final**: tiempo de retorno y de espera de cada proceso, los promedios y el rendimiento del sistema (procesos terminados por unidad de tiempo).
+Se debe presionar **Enter** para avanzar al siguiente evento. Al terminar todos los procesos se muestra el **informe final**: tiempo de retorno y de espera de cada proceso (calculados sobre la cola de Listos), los promedios y el rendimiento del sistema (procesos terminados por unidad de tiempo).
 ---------------------------------------------------------------------------------------------------------------------------------------Formato del archivo de procesos (.csv)
 Primera línea con el encabezado `ID,TA,TI,TAM` y luego un proceso por línea:
 | Columna | Significado | Restricción |

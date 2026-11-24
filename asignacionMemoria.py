@@ -69,3 +69,12 @@ def unirParticionesMemoria(memoria):
             memoria.pop(i + 1)
         else:
             i += 1
+#La suma de los huecos de memoria disponibles podrian alojar al proceso,pero no pueden hacerlo al no ser contiguos 
+def calcularFragmentacionExterna(memoria, listosSuspendidos):
+    huecosLibres = [p.tamano for p in memoria if p.proceso is None]
+    memoriaLibreTotal = sum(huecosLibres)
+    mayorHueco = max(huecosLibres, default=0)
+    for proceso in listosSuspendidos:
+        if mayorHueco < proceso.tamano <= memoriaLibreTotal:
+            return memoriaLibreTotal
+    return 0
